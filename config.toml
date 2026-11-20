@@ -1,0 +1,41 @@
+# Παράδειγμα ρυθμίσεων για όσους τρέχουν το Notifier από τον κώδικα.
+# Με τον launcher (.exe / .app) δεν χρειάζεται: το αρχείο γράφεται μόνο του.
+# Οι κωδικοί ΔΕΝ μπαίνουν εδώ. Ζουν στο Keychain (Mac), στο Credential Manager
+# (Windows) ή στα GitHub Secrets (cloud). Κάθε τιμή μπορεί να αλλάξει με env.
+
+[general]
+timezone = "Europe/Athens"
+
+[university]
+id = "uniwa"          # από τον κατάλογο: src/uniwa_notifier/catalog/universities/
+department = "ice"    # προαιρετικό, για το RSS του τμήματος
+
+[notify]
+# Ιδιωτική λειτουργία: push και email χωρίς τίτλους, μαθήματα ή βαθμούς.
+private = true
+email = false
+desktop = true
+ntfy_server = "https://ntfy.sh"
+
+[announcements]
+include_eclass_system = false
+
+[digest]
+since = 2026-01-01      # αγνοεί εργασίες παλαιότερες από αυτή την ημερομηνία
+always = false          # στέλνει σύνοψη και όταν δεν υπάρχει καμία εργασία
+hide_submitted = false  # κρύβει όσες έχεις ήδη υποβάλει
+
+[services]
+# Αν έχεις πολλά προφίλ φοιτητή, όρισε αριθμό μητρώου ή κωδικό τμήματος.
+# profile = "123"
+
+[labs]
+email = false
+until_hour = 12
+
+# Εξαιρέσεις ανά μάθημα (κωδικός eClass). Η μέρα/ώρα βρίσκεται αυτόματα από την
+# ομάδα χρηστών σου. Παράδειγμα: εργαστήριο ανά 2 εβδομάδες.
+[labs.courses.ICE101]
+name = "Παράδειγμα μαθήματος"
+every_weeks = 2
+anchor = 2026-10-02

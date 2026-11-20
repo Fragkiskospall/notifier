@@ -1,0 +1,96 @@
+name: release
+
+# Χτίζει τον launcher για Windows (.exe) και macOS (.app).
+# - Με workflow_dispatch: τα αρχεία μένουν ως artifacts του run (για δοκιμή).
+# - Με tag vX.Y.Z: δημιουργείται και GitHub Release με τα δύο zip.
+on:
+  workflow_dispatch: {}
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: FragkiskOSource Notifier
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: windows
+          - os: macos-latest
+            target: macos
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[launcher]" pyinstaller
+
+      - name: Build
+        shell: bash
+        run: |
+          extra=""
+          if [ "${{ matrix.target }}" = "windows" ]; then extra="--collect-all desktop_notifier"; fi
+          pyinstaller --noconfirm --clean --windowed \
+            --name "$APP_NAME" \
+            --osx-bundle-identifier gr.fragkiskosource.notifier \
+            --collect-data uniwa_notifier \
+            --collect-submodules keyring.backends \
+            --collect-submodules uniwa_notifier \
+            $extra \
+            packaging/notifier_launcher.py
+
+      - name: Smoke test (το ίδιο εκτελέσιμο τρέχει και τα jobs)
+        shell: bash
+        run: |
+          if [ "${{ matrix.target }}" = "windows" ]; then
+            exe="dist/$APP_NAME/$APP_NAME.exe"
+          else
+            exe="dist/$APP_NAME.app/Contents/MacOS/$APP_NAME"
+          fi
+          "$exe" schedule install --dry-run
+
+      - name: Zip
+        shell: bash
+        run: |
+          mkdir -p out
+          if [ "${{ matrix.target }}" = "windows" ]; then
+            (cd dist && 7z a -tzip "../out/FragkiskOSource-Notifier-windows.zip" "$APP_NAME" > /dev/null)
+          else
+            ditto -c -k --sequesterRsrc --keepParent "dist/$APP_NAME.app" "out/FragkiskOSource-Notifier-macos.zip"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notifier-${{ matrix.target }}
+          path: out/*.zip
+          retention-days: 14
+
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Αν το release υπάρχει ήδη (π.χ. μετακινήθηκε το tag), αντικαθιστά μόνο τα αρχεία
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" out/*.zip --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" out/*.zip \
+              --repo "$GITHUB_REPOSITORY" --title "Notifier $GITHUB_REF_NAME" --generate-notes
+          fi

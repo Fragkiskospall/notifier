@@ -1,0 +1,11 @@
+id = "duth"
+name = "Δημοκρίτειο Πανεπιστήμιο Θράκης"
+short = "ΔΠΘ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://eclass.duth.gr/"
+
+[eclass]
+url = "https://eclass.duth.gr"
+auth = "auto"

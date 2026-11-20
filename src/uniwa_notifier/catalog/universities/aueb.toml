@@ -1,0 +1,11 @@
+id = "aueb"
+name = "Οικονομικό Πανεπιστήμιο Αθηνών"
+short = "ΟΠΑ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://eclass.aueb.gr/modules/auth/courses.php?fc=33"
+
+[eclass]
+url = "https://eclass.aueb.gr"
+auth = "auto"

@@ -1,0 +1,24 @@
+# Το Πανεπιστήμιο Πειραιώς έχει κεντρικό eClass, αλλά δύο τμήματα τρέχουν δικό τους.
+id = "unipi"
+name = "Πανεπιστήμιο Πειραιώς"
+short = "ΠΑΠΕΙ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://www.tex.unipi.gr/wp-content/uploads/2024/07/proswpopoihmenes-efarmoges.pdf"
+
+[eclass]
+url = "https://eclass.unipi.gr"
+auth = "auto"
+
+[[eclass.extra]]
+department = "Πληροφορικής"
+url = "https://gunet2.cs.unipi.gr"
+auth = "cas"
+source = "https://maritime-unipi.gr/wp-content/uploads/2021/10/Καλωσορίσατε-στο-Πανεπιστήμιο-Πειραιως-202-1-ΟΕ.pdf"
+
+[[eclass.extra]]
+department = "Ψηφιακών Συστημάτων"
+url = "https://aristarchus.ds.unipi.gr"
+auth = "auto"
+unverified = "δεν έχει επιβεβαιωθεί ότι είναι Open eClass"

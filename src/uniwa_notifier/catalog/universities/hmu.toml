@@ -1,0 +1,11 @@
+id = "hmu"
+name = "Ελληνικό Μεσογειακό Πανεπιστήμιο"
+short = "ΕΛΜΕΠΑ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://eclass.hmu.gr/"
+
+[eclass]
+url = "https://eclass.hmu.gr"
+auth = "auto"

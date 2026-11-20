@@ -1,0 +1,12 @@
+# Το παλιό e-class.ionio.gr καταργείται· το ενεργό Open eClass είναι στο opencourses.
+id = "ionio"
+name = "Ιόνιο Πανεπιστήμιο"
+short = "ΙΠ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://fst.ionio.gr/en/students/e-class"
+
+[eclass]
+url = "https://opencourses.ionio.gr"
+auth = "auto"

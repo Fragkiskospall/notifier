@@ -1,0 +1,11 @@
+id = "upatras"
+name = "Πανεπιστήμιο Πατρών"
+short = "ΠΠ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://innovsustent.upatras.gr/en/webmail-e-class/"
+
+[eclass]
+url = "https://eclass.upatras.gr"
+auth = "auto"

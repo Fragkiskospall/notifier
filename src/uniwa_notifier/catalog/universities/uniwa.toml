@@ -1,0 +1,23 @@
+# Πανεπιστήμιο Δυτικής Αττικής: η μόνη εγγραφή με πλήρη υποστήριξη,
+# δοκιμασμένη με πραγματικό λογαριασμό φοιτητή.
+id = "uniwa"
+name = "Πανεπιστήμιο Δυτικής Αττικής"
+short = "ΠΑΔΑ"
+platform = "openeclass"
+support = "full"
+verified = 2026-11-20
+source = "https://wvbs.uniwa.gr/?p=236650"
+
+[eclass]
+url = "https://eclass.uniwa.gr"
+auth = "form"
+
+[grades]
+portal = "https://services.uniwa.gr"
+sso = "https://sso.uniwa.gr"
+adapter = "ilyda"
+
+[[departments]]
+id = "ice"
+name = "Μηχανικών Πληροφορικής και Υπολογιστών"
+rss = "https://ice.uniwa.gr/feed/"

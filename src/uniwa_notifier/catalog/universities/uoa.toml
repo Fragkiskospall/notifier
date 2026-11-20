@@ -1,0 +1,11 @@
+id = "uoa"
+name = "Εθνικό και Καποδιστριακό Πανεπιστήμιο Αθηνών"
+short = "ΕΚΠΑ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://en.noc.uoa.gr/services/digital_classroom_eclass"
+
+[eclass]
+url = "https://eclass.uoa.gr"
+auth = "auto"

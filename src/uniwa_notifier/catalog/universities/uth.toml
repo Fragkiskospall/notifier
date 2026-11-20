@@ -1,0 +1,11 @@
+id = "uth"
+name = "Πανεπιστήμιο Θεσσαλίας"
+short = "ΠΘ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://eclass.uth.gr"
+
+[eclass]
+url = "https://eclass.uth.gr"
+auth = "auto"

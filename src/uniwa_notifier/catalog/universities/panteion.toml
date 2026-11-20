@@ -1,0 +1,11 @@
+id = "panteion"
+name = "Πάντειο Πανεπιστήμιο Κοινωνικών και Πολιτικών Επιστημών"
+short = "Πάντειο"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://deps.panteion.gr/wp-content/uploads/2023/10/Οδηγίες-προς-φοιτητές-eclass-17-10-23.pdf"
+
+[eclass]
+url = "https://openeclass.panteion.gr"
+auth = "auto"

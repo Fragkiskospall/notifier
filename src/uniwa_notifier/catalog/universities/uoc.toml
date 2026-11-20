@@ -1,0 +1,11 @@
+# Το Πανεπιστήμιο Κρήτης χρησιμοποιεί Moodle, όχι Open eClass. Χρειάζεται ξεχωριστό adapter.
+id = "uoc"
+name = "Πανεπιστήμιο Κρήτης"
+short = "ΠΚρ"
+platform = "moodle"
+support = "unsupported"
+verified = 2026-11-20
+source = "https://ict.uoc.gr/images/339η_Πολιτική_ΠΚ_για_ηλεκτρονική_μάθηση.pdf"
+
+[lms]
+url = "https://elearn.uoc.gr"

@@ -1,0 +1,11 @@
+id = "uowm"
+name = "Πανεπιστήμιο Δυτικής Μακεδονίας"
+short = "ΠΔΜ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://eclass.uowm.gr/courses/ELED431/"
+
+[eclass]
+url = "https://eclass.uowm.gr"
+auth = "auto"

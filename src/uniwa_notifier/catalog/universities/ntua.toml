@@ -1,0 +1,11 @@
+# Το ΕΜΠ χρησιμοποιεί Moodle (helios), όχι Open eClass. Χρειάζεται ξεχωριστό adapter.
+id = "ntua"
+name = "Εθνικό Μετσόβιο Πολυτεχνείο"
+short = "ΕΜΠ"
+platform = "moodle"
+support = "unsupported"
+verified = 2026-11-20
+source = "https://helios.ntua.gr"
+
+[lms]
+url = "https://helios.ntua.gr"

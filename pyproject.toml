@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fragkiskosource-notifier"
+version = "3.0.0"
+description = "Ειδοποιήσεις για ανακοινώσεις, εργασίες, εργαστήρια και βαθμούς από Open eClass, για Windows και macOS"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+readme = "README.md"
+dependencies = [
+  "requests>=2.31",
+  "feedparser>=6.0",
+  "beautifulsoup4>=4.12",
+  "python-dotenv>=1.0",
+  "cryptography>=42",
+  "keyring>=25; sys_platform == 'darwin' or sys_platform == 'win32'",
+  "desktop-notifier>=6; sys_platform == 'win32'",
+  "tzdata; sys_platform == 'win32'",
+]
+
+[project.urls]
+Homepage = "https://fragkiskospall.github.io/notifier/"
+Source = "https://github.com/Fragkiskospall/notifier"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+launcher = ["PySide6-Essentials>=6.7", "segno>=1.6"]
+
+[project.scripts]
+uniwa-notifier = "uniwa_notifier.cli:main"
+
+[project.gui-scripts]
+fragkiskosource-notifier = "uniwa_notifier.launcher.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+uniwa_notifier = ["catalog/universities/*.toml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]

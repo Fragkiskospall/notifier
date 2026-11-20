@@ -1,0 +1,11 @@
+id = "aegean"
+name = "Πανεπιστήμιο Αιγαίου"
+short = "ΠΑΙ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://eclass.aegean.gr/courses/ENV110/"
+
+[eclass]
+url = "https://eclass.aegean.gr"
+auth = "auto"

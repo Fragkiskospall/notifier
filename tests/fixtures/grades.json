@@ -1,0 +1,18 @@
+[
+  {"id": "A1", "title": "ΑΛΓΟΡΙΘΜΟΙ ΚΑΙ ΠΟΛΥΠΛΟΚΟΤΗΤΑ", "courseCode": "ICE1-3001", "grade": "0.35",
+   "baseGrade": "0.5", "isPassed": "false", "dateAdded": "1770793818000", "dateModified": "1770793818000",
+   "periodTitle": "Χειμερινή",
+   "examPeriodId": {"code": "2025-1", "title": "ΕΞΕΤΑΣΤΙΚΗ ΧΕΙΜΕΡΙΝΟΥ ΕΞΑΜΗΝΟΥ 2025-2026"},
+   "gradingScaleId": {"title": "0-10", "baseGrade": 0.5, "maxNumber": 10}},
+  {"id": "A2", "title": "ΑΝΑΛΥΣΗ ΚΑΙ ΣΧΕΔΙΑΣΜΟΣ ΠΛΗΡΟΦΟΡΙΑΚΩΝ ΣΥΣ", "courseCode": "ICE1-5003", "grade": "0.7",
+   "baseGrade": "0.5", "isPassed": "true", "dateAdded": "1780051224000", "dateModified": "1780051224000",
+   "periodTitle": "Χειμερινή",
+   "examPeriodId": {"code": "2025-1", "title": "ΕΞΕΤΑΣΤΙΚΗ ΧΕΙΜΕΡΙΝΟΥ ΕΞΑΜΗΝΟΥ 2025-2026"}},
+  {"id": "A3", "title": "ΠΑΛΙΟ ΜΑΘΗΜΑ", "courseCode": "ICE-100", "grade": "6",
+   "baseGrade": "5", "isPassed": "true", "dateAdded": "1600000000000", "dateModified": "1600000000000",
+   "periodTitle": "Εαρινή", "examPeriodId": null},
+  {"id": "A4", "title": "ΨΗΦΙΑΚΗ ΕΠΕΞΕΡΓΑΣΙΑ ΣΗΜΑΤΟΣ", "courseCode": "ICE1-5005", "grade": null,
+   "baseGrade": "0.5", "isPassed": "false", "dateAdded": "1790336897000", "dateModified": "1790336897000",
+   "periodTitle": "Χειμερινή",
+   "examPeriodId": {"code": "2026-1", "title": "ΕΞΕΤΑΣΤΙΚΗ ΧΕΙΜΕΡΙΝΟΥ ΕΞΑΜΗΝΟΥ 2026-2027"}}
+]

@@ -1,0 +1,11 @@
+id = "tuc"
+name = "Πολυτεχνείο Κρήτης"
+short = "ΠΚ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://www.eclass.tuc.gr/info/faq.php"
+
+[eclass]
+url = "https://www.eclass.tuc.gr"
+auth = "auto"

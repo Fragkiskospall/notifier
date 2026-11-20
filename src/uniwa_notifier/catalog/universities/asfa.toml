@@ -1,0 +1,11 @@
+id = "asfa"
+name = "Ανωτάτη Σχολή Καλών Τεχνών"
+short = "ΑΣΚΤ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://eclass.asfa.gr/main/system_announcements.php?an_id=7"
+
+[eclass]
+url = "https://eclass.asfa.gr"
+auth = "auto"

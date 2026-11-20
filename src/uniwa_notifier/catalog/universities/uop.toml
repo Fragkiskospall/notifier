@@ -1,0 +1,11 @@
+id = "uop"
+name = "Πανεπιστήμιο Πελοποννήσου"
+short = "ΠΑΠΕΛ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://eclass.uop.gr/modules/auth/courses.php?fc=1"
+
+[eclass]
+url = "https://eclass.uop.gr"
+auth = "auto"

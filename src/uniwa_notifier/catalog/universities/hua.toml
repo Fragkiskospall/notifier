@@ -1,0 +1,11 @@
+id = "hua"
+name = "Χαροκόπειο Πανεπιστήμιο"
+short = "ΧΠ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://eclass.hua.gr/"
+
+[eclass]
+url = "https://eclass.hua.gr"
+auth = "auto"

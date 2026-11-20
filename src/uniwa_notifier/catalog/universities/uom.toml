@@ -1,0 +1,11 @@
+id = "uom"
+name = "Πανεπιστήμιο Μακεδονίας"
+short = "ΠΑΜΑΚ"
+platform = "openeclass"
+support = "eclass"
+verified = 2026-11-20
+source = "https://openeclass.uom.gr/info/faq.php"
+
+[eclass]
+url = "https://openeclass.uom.gr"
+auth = "auto"

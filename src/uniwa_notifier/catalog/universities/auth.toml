@@ -1,0 +1,11 @@
+# Το ΑΠΘ χρησιμοποιεί Moodle, όχι Open eClass. Χρειάζεται ξεχωριστό adapter.
+id = "auth"
+name = "Αριστοτέλειο Πανεπιστήμιο Θεσσαλονίκης"
+short = "ΑΠΘ"
+platform = "moodle"
+support = "unsupported"
+verified = 2026-11-20
+source = "https://it.auth.gr/?p=45868"
+
+[lms]
+url = "https://elearning.auth.gr"
