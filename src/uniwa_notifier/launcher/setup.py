@@ -52,8 +52,10 @@ class SecretStore:
 
 
 def new_topic() -> str:
-    """Τυχαίο, μη μαντεύσιμο κανάλι ntfy (μόνο γράμματα/αριθμοί, όπως θέλει το ntfy)."""
-    return "fos-" + pysecrets.token_hex(12)
+    """Τυχαίο, μη μαντεύσιμο κανάλι ntfy: 128 bit, μόνο γράμματα/αριθμοί όπως θέλει το ntfy.
+    Στο ntfy.sh όποιος ξέρει το όνομα του καναλιού διαβάζει τις ειδοποιήσεις, άρα
+    το όνομα λειτουργεί σαν κωδικός."""
+    return "fos-" + pysecrets.token_hex(16)
 
 
 def ntfy_subscribe_url(topic: str, server: str = NTFY_SERVER) -> str:

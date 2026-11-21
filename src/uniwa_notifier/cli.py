@@ -143,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
     health.ping(cfg.healthcheck_url, "/start")
     try:
         if stateful:
-            with vault.open_state(cfg.state_dir, cfg.state_key) as db:
+            with vault.open_state(cfg.state_dir, cfg.state_key, secrets.state_counter()) as db:
                 cfg.db_path = db
                 rc = jobs[args.cmd]()
         else:

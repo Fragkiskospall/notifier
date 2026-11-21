@@ -1,5 +1,9 @@
 """Ευαίσθητα στοιχεία στην αποθήκη κωδικών του λειτουργικού: Keychain στο Mac,
-Credential Manager στα Windows. Στο cloud έρχονται ως env (GitHub Secrets)."""
+Credential Manager στα Windows. Στο cloud έρχονται ως env (GitHub Secrets).
+
+Οι κωδικοί από την αποθήκη διαβάζονται απευθείας όταν χρειάζονται και δεν
+μπαίνουν ποτέ στο environment του process, όπου θα τους έβλεπαν και όσα
+προγράμματα ξεκινά η εφαρμογή."""
 from __future__ import annotations
 
 import os
@@ -9,7 +13,8 @@ from pathlib import Path
 
 SERVICE = "uniwa-notifier"
 KEYS = ("ECLASS_USERNAME", "ECLASS_PASSWORD", "SMTP_USER", "SMTP_PASSWORD",
-        "MAIL_TO", "NTFY_TOPIC", "NTFY_TOKEN", "HEALTHCHECK_URL", "STATE_KEY")
+        "MAIL_TO", "NTFY_TOPIC", "NTFY_TOKEN", "HEALTHCHECK_URL", "STATE_KEY",
+        "STATE_COUNTER")
 
 
 STORE_NAMES = {"darwin": "Keychain", "win32": "Credential Manager"}
@@ -41,21 +46,29 @@ def _keyring():
         return None
 
 
-def load_into_env() -> None:
-    """Συμπληρώνει από την αποθήκη κωδικών όσα δεν υπάρχουν ήδη ως env."""
-    kr = _keyring()
-    if kr is None:
-        return
-    for k in KEYS:
-        if os.getenv(k):
-            continue
-        try:
-            v = kr.get_password(SERVICE, k)
-        except Exception:
-            return
-        v = clean(k, v)
-        if v:
-            os.environ[k] = v
+def lookup(key: str) -> str | None:
+    """Η τιμή ενός secret: πρώτα από env (cloud, .env), αλλιώς από την αποθήκη
+    του λειτουργικού. Η τιμή από την αποθήκη επιστρέφεται, δεν γράφεται στο env."""
+    v = clean(key, os.getenv(key))
+    if v or key not in KEYS:
+        return v
+    return get_secret(key)
+
+
+class KeyringCounter:
+    """Ο μετρητής έκδοσης του κρυπτογραφημένου state, στην αποθήκη κωδικών."""
+
+    def get(self) -> int | None:
+        v = get_secret("STATE_COUNTER")
+        return int(v) if v and v.isdigit() else None
+
+    def set(self, value: int) -> None:
+        set_secret("STATE_COUNTER", str(value))
+
+
+def state_counter() -> KeyringCounter | None:
+    """None όπου δεν υπάρχει αποθήκη κωδικών (π.χ. GitHub Actions)."""
+    return KeyringCounter() if _keyring() is not None else None
 
 
 def import_from_env_file(env_path: Path) -> list[str]:

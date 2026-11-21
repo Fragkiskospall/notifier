@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from uniwa_notifier import system
+from uniwa_notifier import secrets, system
 
 FIXTURES = Path(__file__).parent / "fixtures"
 ATHENS = ZoneInfo("Europe/Athens")
@@ -28,3 +28,9 @@ def _silent_desktop(monkeypatch):
     """Τα tests δεν εμφανίζουν ποτέ πραγματικές ειδοποιήσεις υπολογιστή,
     ούτε αγγίζουν τα jobs του συστήματος (σε κανένα λειτουργικό)."""
     monkeypatch.setattr(system, "_current", system.LinuxBackend())
+
+
+@pytest.fixture(autouse=True)
+def _no_real_keyring(monkeypatch):
+    """Τα tests δεν διαβάζουν ούτε γράφουν ποτέ την πραγματική αποθήκη κωδικών."""
+    monkeypatch.setattr(secrets, "_keyring", lambda: None)

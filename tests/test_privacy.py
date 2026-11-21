@@ -81,6 +81,105 @@ def test_failed_job_keeps_previous_state(tmp_path):
     assert (tmp_path / "seen.db.enc").read_bytes() == before
 
 
+class _MemCounter:
+    def __init__(self, value=None):
+        self.value = value
+
+    def get(self):
+        return self.value
+
+    def set(self, value):
+        self.value = value
+
+
+def test_old_format_still_readable():
+    key = vault.generate_key()
+    nonce = b"\0" * 12
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    old = vault.MAGIC_V1 + nonce + AESGCM(vault._key(key)).encrypt(nonce, b"legacy", vault.AAD)
+    assert vault.unseal(old, key) == (0, b"legacy")
+
+
+def test_counter_goes_up_on_every_change(tmp_path):
+    key, counter = vault.generate_key(), _MemCounter()
+    with vault.open_state(tmp_path, key, counter) as db:
+        _write_db(db, "a")
+    with vault.open_state(tmp_path, key, counter) as db:
+        sqlite3.connect(db).execute("INSERT INTO t VALUES ('b')").connection.commit()
+    assert counter.value == 2
+    assert vault.unseal((tmp_path / "seen.db.enc").read_bytes(), key)[0] == 2
+
+
+def test_rollback_to_older_copy_is_rejected(tmp_path):
+    key, counter = vault.generate_key(), _MemCounter()
+    with vault.open_state(tmp_path, key, counter) as db:
+        _write_db(db, "παλιό")
+    old_copy = (tmp_path / "seen.db.enc").read_bytes()
+    with vault.open_state(tmp_path, key, counter) as db:
+        sqlite3.connect(db).execute("INSERT INTO t VALUES ('νέο')").connection.commit()
+
+    (tmp_path / "seen.db.enc").write_bytes(old_copy)  # επαναφορά παλιού, έγκυρου αρχείου
+    with vault.open_state(tmp_path, key, counter) as db:
+        assert not db.exists()  # δεν φορτώθηκε: το state ξεκινά από την αρχή
+        _write_db(db, "ξανά")
+    assert vault.unseal((tmp_path / "seen.db.enc").read_bytes(), key)[0] == 3
+
+
+def test_counter_failure_does_not_break_jobs(tmp_path):
+    class Broken:
+        def get(self):
+            raise OSError("keychain locked")
+
+        def set(self, value):
+            raise OSError("keychain locked")
+
+    key = vault.generate_key()
+    with vault.open_state(tmp_path, key, Broken()) as db:
+        _write_db(db, "a")
+    assert vault.decrypt((tmp_path / "seen.db.enc").read_bytes(), key)
+
+
+def test_keychain_secrets_never_enter_environment(monkeypatch, tmp_path):
+    from uniwa_notifier import config, secrets
+
+    class FakeKeyring:
+        def get_password(self, service, key):
+            return {"ECLASS_PASSWORD": "s3cret", "STATE_KEY": KEY}.get(key)
+
+    monkeypatch.setattr(secrets, "_keyring", lambda: FakeKeyring())
+    monkeypatch.setenv("UNIWA_HOME", str(tmp_path))
+    monkeypatch.delenv("ECLASS_PASSWORD", raising=False)
+    monkeypatch.delenv("STATE_KEY", raising=False)
+    cfg = config.load()
+    assert cfg.eclass_password == "s3cret" and cfg.state_key == KEY
+    import os
+    assert "ECLASS_PASSWORD" not in os.environ and "STATE_KEY" not in os.environ
+
+
+def test_env_still_wins_over_keychain(monkeypatch, tmp_path):
+    from uniwa_notifier import config, secrets
+
+    class FakeKeyring:
+        def get_password(self, service, key):
+            return "from-keychain"
+
+    monkeypatch.setattr(secrets, "_keyring", lambda: FakeKeyring())
+    monkeypatch.setenv("UNIWA_HOME", str(tmp_path))
+    monkeypatch.setenv("ECLASS_USERNAME", "from-env")
+    assert config.load().eclass_username == "from-env"
+
+
+@pytest.mark.parametrize("url", ["http://ntfy.sh", "ftp://x", "ntfy.sh"])
+def test_ntfy_refuses_plain_http(url):
+    with pytest.raises(ValueError):
+        notify.ntfy.check_server(url)
+
+
+@pytest.mark.parametrize("url", ["https://ntfy.sh", "https://ntfy.example.org/", "http://localhost:8080"])
+def test_ntfy_accepts_https_and_local(url):
+    notify.ntfy.check_server(url)
+
+
 # ---------------------------------------------------------------- ειδοποιήσεις & logs
 
 def _capture(monkeypatch):

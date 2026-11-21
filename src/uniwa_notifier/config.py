@@ -37,7 +37,7 @@ def _env_flag(name: str, default: bool) -> bool:
 
 
 def _secret(name: str) -> str | None:
-    return secrets.clean(name, os.getenv(name))
+    return secrets.lookup(name)
 
 
 def _as_date(v) -> date:
@@ -101,7 +101,6 @@ def load(config_path: Path | None = None) -> Settings:
         load_dotenv(root_dir() / ".env")
     except ImportError:
         pass
-    secrets.load_into_env()
 
     path = config_path or Path(os.getenv("UNIWA_CONFIG") or root_dir() / "config.toml")
     raw: dict = tomllib.loads(path.read_text(encoding="utf-8")) if path.exists() else {}

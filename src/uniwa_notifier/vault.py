@@ -16,12 +16,15 @@ import shutil
 import tempfile
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Protocol
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 log = logging.getLogger(__name__)
 
-MAGIC = b"UNWA1"  # έκδοση μορφής αρχείου
+MAGIC_V1 = b"UNWA1"  # παλιά μορφή: nonce + ciphertext
+MAGIC = b"UNWA2"     # νέα μορφή: ο μετρητής έκδοσης μπαίνει μέσα στο κρυπτογραφημένο κομμάτι
+COUNTER_BYTES = 8
 AAD = b"uniwa-notifier/seen.db"
 ENC_NAME = "seen.db.enc"
 PLAIN_NAME = "seen.db"
@@ -45,19 +48,57 @@ def _key(b64: str) -> bytes:
     return key
 
 
-def encrypt(data: bytes, b64key: str) -> bytes:
+class Counter(Protocol):
+    """Πού κρατάμε τον τελευταίο μετρητή έκδοσης, έξω από τον φάκελο state
+    (στο Keychain / Credential Manager). Με αυτόν απορρίπτεται ένα παλιότερο,
+    έγκυρο seen.db.enc που κάποιος έβαλε στη θέση του τωρινού."""
+
+    def get(self) -> int | None: ...
+    def set(self, value: int) -> None: ...
+
+
+def seal(data: bytes, b64key: str, counter: int = 0) -> bytes:
     nonce = os.urandom(12)
-    return MAGIC + nonce + AESGCM(_key(b64key)).encrypt(nonce, data, AAD)
+    body = counter.to_bytes(COUNTER_BYTES, "big") + data
+    return MAGIC + nonce + AESGCM(_key(b64key)).encrypt(nonce, body, AAD)
 
 
-def decrypt(blob: bytes, b64key: str) -> bytes:
-    if not blob.startswith(MAGIC):
+def unseal(blob: bytes, b64key: str) -> tuple[int, bytes]:
+    """(μετρητής, δεδομένα). Δέχεται και την παλιά μορφή, με μετρητή 0."""
+    if blob.startswith(MAGIC):
+        versioned = True
+    elif blob.startswith(MAGIC_V1):
+        versioned = False
+    else:
         raise VaultError("Άγνωστη μορφή κρυπτογραφημένου state")
     nonce, ct = blob[len(MAGIC):len(MAGIC) + 12], blob[len(MAGIC) + 12:]
     try:
-        return AESGCM(_key(b64key)).decrypt(nonce, ct, AAD)
+        plain = AESGCM(_key(b64key)).decrypt(nonce, ct, AAD)
     except Exception as e:
         raise VaultError("Αποτυχία αποκρυπτογράφησης state (λάθος STATE_KEY;)") from e
+    if not versioned:
+        return 0, plain
+    if len(plain) < COUNTER_BYTES:
+        raise VaultError("Κατεστραμμένο state")
+    return int.from_bytes(plain[:COUNTER_BYTES], "big"), plain[COUNTER_BYTES:]
+
+
+def encrypt(data: bytes, b64key: str) -> bytes:
+    return seal(data, b64key)
+
+
+def decrypt(blob: bytes, b64key: str) -> bytes:
+    return unseal(blob, b64key)[1]
+
+
+def _safe_get(counter: Counter | None) -> int | None:
+    if counter is None:
+        return None
+    try:
+        return counter.get()
+    except Exception:
+        log.warning("Δεν διαβάστηκε ο μετρητής έκδοσης του state")
+        return None
 
 
 def _wipe(path: Path) -> None:
@@ -73,12 +114,15 @@ def _wipe(path: Path) -> None:
 
 
 @contextlib.contextmanager
-def open_state(state_dir: Path, b64key: str | None) -> Iterator[Path]:
+def open_state(state_dir: Path, b64key: str | None, counter: Counter | None = None) -> Iterator[Path]:
     """Δίνει path προς ένα προσωρινό seen.db και το ξανακρυπτογραφεί στο τέλος.
 
     - Υπάρχει seen.db.enc → αποκρυπτογράφηση σε temp.
     - Υπάρχει μόνο παλιό seen.db σε απλή μορφή → χρησιμοποιείται και μετά σβήνεται (migration).
     - Το .enc ξαναγράφεται μόνο αν άλλαξε το περιεχόμενο, ώστε να μη γίνεται push σε κάθε run.
+    - Με `counter`: αν το αρχείο είναι παλιότερο από τον αποθηκευμένο μετρητή
+      (επαναφορά παλιού αντιγράφου), αγνοείται και το state χτίζεται από την αρχή.
+      Αυτό δεν στέλνει ειδοποιήσεις: οι πηγές καταγράφονται σαν να τις βλέπουμε πρώτη φορά.
     """
     state_dir.mkdir(parents=True, exist_ok=True)
     enc_path, legacy = state_dir / ENC_NAME, state_dir / PLAIN_NAME
@@ -92,11 +136,17 @@ def open_state(state_dir: Path, b64key: str | None) -> Iterator[Path]:
     os.chmod(tmp, 0o700)
     work = tmp / PLAIN_NAME
     before: bytes | None = None
+    expected = _safe_get(counter)
+    version = expected or 0
     try:
         if enc_path.exists():
-            plain = decrypt(enc_path.read_bytes(), b64key)
-            work.write_bytes(plain)
-            before = hashlib.sha256(plain).digest()
+            found, plain = unseal(enc_path.read_bytes(), b64key)
+            if expected is not None and found < expected:
+                log.warning("Το state είναι παλιότερο από το αναμενόμενο: αγνοείται και ξαναχτίζεται")
+            else:
+                work.write_bytes(plain)
+                before = hashlib.sha256(plain).digest()
+                version = max(version, found)
         elif legacy.exists():
             log.info("Μεταφορά παλιού state σε κρυπτογραφημένη μορφή")
             shutil.copyfile(legacy, work)
@@ -108,9 +158,17 @@ def open_state(state_dir: Path, b64key: str | None) -> Iterator[Path]:
         if work.exists():
             plain = work.read_bytes()
             if before is None or hashlib.sha256(plain).digest() != before:
+                version += 1
                 tmp_enc = enc_path.with_suffix(".tmp")
-                tmp_enc.write_bytes(encrypt(plain, b64key))
+                tmp_enc.write_bytes(seal(plain, b64key, version))
                 tmp_enc.replace(enc_path)
+                # Πρώτα το αρχείο, μετά ο μετρητής: αν κοπεί στη μέση, το αρχείο
+                # είναι νεότερο από τον μετρητή, που επιτρέπεται.
+                if counter is not None:
+                    try:
+                        counter.set(version)
+                    except Exception:
+                        log.warning("Δεν αποθηκεύτηκε ο μετρητής έκδοσης του state")
         if legacy.exists():
             _wipe(legacy)
     finally:

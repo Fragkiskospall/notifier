@@ -59,7 +59,7 @@ def _choices(**over):
 
 def test_topic_is_random_and_ntfy_safe():
     a, b = setup.new_topic(), setup.new_topic()
-    assert a != b and a.startswith("fos-") and a.replace("-", "").isalnum() and len(a) >= 20
+    assert a != b and a.startswith("fos-") and a.replace("-", "").isalnum() and len(a) >= 36  # fos- + 128 bit σε hex
     assert setup.ntfy_subscribe_url(a) == f"https://ntfy.sh/{a}"
 
 
